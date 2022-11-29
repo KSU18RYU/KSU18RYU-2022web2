@@ -4,7 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var qs = require('querystring');
 var bodyParser = require('body-parser');
-var sanitizeHtml = require('sanitize-html');
 var template = require('./lib/template.js');
 //var compression = require('compression')
 
