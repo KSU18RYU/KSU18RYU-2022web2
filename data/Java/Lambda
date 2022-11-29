@@ -1,0 +1,7 @@
+Lambda를 Collections.sort에 응용하는 코드와 출력 결과입니다.<br>
+<img src="LambdaTest.png" width="500"><br>
+<img src="LambdaPrint.png" width="100"><br>
+Lambda를 사용하지 않은 같은 기능의 코드와 출력 결과입니다.<br>
+<img src="LambdaNotTest.png" width="500"><br>
+<img src="LambdaPrint.png" width="100"><br>
+Lambda를 사용함으로써 Comparator 인터페이스의 구현을 생략한 것을 알 수 있습니다.

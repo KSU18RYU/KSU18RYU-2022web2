@@ -1,0 +1,6 @@
+순전파 소프트맥수 함수(softamx)<br>
+소프트맥스 함수는 세 개 이상으로 분류하는 다중 클래스 분류에서 사용되는 활성화 함수로,<br>
+출력층의 모든 노드에 대해 각 대상 클래스의 확률을 계산합니다.<br>
+아래는 소스와 출력 예제 입니다.<br>
+<img src="softmax.png" width="200">
+<img src="softmaxPrint.png" width="200">

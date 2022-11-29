@@ -1,0 +1,62 @@
+a{
+  color:black;
+  text-decoration-line: none;
+  /* a 태그의 텍스트 밑줄 없애기 */
+}
+h1{
+  text-align: center;
+  border-bottom: 3px solid black;
+  margin: 0px;
+}
+#login{
+  text-align: right;
+}
+#grid{
+  display: grid;
+  grid-template-columns: 150px 1fr;
+}
+#menu p{
+  font-size: 16px;
+  padding-left: 20px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin: 0px;
+  border-bottom: 1px solid rgb(220, 220, 220);
+}
+#grid ul{
+  list-style: none;
+  /* font-size: 25px; */
+  border-right: 3px solid black;
+  width:150px;
+  margin: 0px;
+  padding-left: 0px;
+  padding-top: 0px;
+}
+#sub-menu li{
+  font-size: 15px;
+  padding-left: 5px;
+}
+#main{
+  padding-top: 20px;
+  padding-left: 20px;
+}
+/* #main p{
+  font-size: 20px;
+} */
+body{
+  margin-left: 450px;
+  margin-right: 450px;
+}
+@media(max-width:1300px){
+  body{
+    margin-left: 200px;
+    margin-right: 200px;
+  }
+}
+#accordionFlushExample li{
+  font-size: 15px;
+  padding-left: 15px;
+}
+#test li{
+  font-family: tint-color;
+}
