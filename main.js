@@ -165,10 +165,10 @@ app.post('/create_process/page/:pageId', function (request, response) {
   var title = post.title;
   var description = post.description;
   fs.writeFile(`data/${request.params.pageId}/${title}`, description, 'utf8', function (err) {
-    // response.redirect(`/page/${title}`);
-    response.write(`<script>setTimeout(function(){
-      location.href='/page/${title}';
-    }, 1000)</script>`);
+    response.redirect(`/page/${title}`);
+      // response.write(`<script>setTimeout(function(){
+      //   location.href='/page/${title}';
+      // }, 1000)</script>`);
   });
 });
 
@@ -232,10 +232,10 @@ app.post('/update_process', function(request, response){
   var description = post.description;
   fs.rename(`data/${dir}/${id}`, `data/${dir}/${title}`, function(error){
     fs.writeFile(`data/${dir}/${title}`, description, 'utf8', function(err){
-      // response.redirect(`/page/${title}`);
-      response.write(`<script>setTimeout(function(){
-        location.href='/page/${title}';
-      }, 1000)</script>`);
+      response.redirect(`/page/${title}`);
+      // response.write(`<script>setTimeout(function(){
+      //   location.href='/page/${title}';
+      // }, 1000)</script>`);
     })
   });
 });
