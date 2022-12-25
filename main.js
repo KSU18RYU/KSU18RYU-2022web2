@@ -2,23 +2,45 @@ var express = require('express')
 var app = express()
 var fs = require('fs');
 var path = require('path');
-var qs = require('querystring');
 var bodyParser = require('body-parser');
 var template = require('./lib/template.js');
 const { request } = require('http');
-var cookie = require('cookie');
-//var compression = require('compression')
+var session = require('express-session');
+var FileStore = require('session-file-store')(session)
 
 app.use(express.static('public'));
 app.use('/page', express.static('public'));
 app.use('/create/page', express.static('public'));
 app.use('/update/page', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(compression());
+app.use(session({
+  secret: 'sdghodsg@#GSDnogs#%#$',	// 원하는 문자 입력
+  resave: false,
+  saveUninitialized: true,
+  store:new FileStore()
+}))
+
+var authRouter = require('./routes/auth');
+app.use('/auth', authRouter);
+
+function authIsOwner(request, response) {
+  if(request.session.is_logined){
+    return true;
+  } else{
+    return false;
+  }
+}
+
+function authStatusUI(request, response) {
+  var authStatusUI = '<div id ="login"><button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleModal">Login </button></div>';
+  if (authIsOwner(request, response)) {
+    authStatusUI = '<div id ="login"><button type="button" class="btn btn-light"><a href="/auth/logout_process">Logout</a></button></button></div>';
+  }
+  return authStatusUI;
+}
 
 var i = 0;
 var cnt = 0;
-var dir;
 var dlist = '';
 var datapath = './data';
 var p = fs.readdirSync(datapath, { withFileTypes: true });
@@ -50,26 +72,6 @@ while (i < p.length) {
   i = i + 1;
 }
 
-function authIsOwner(request, response) {
-  var isOwner = false;
-  var cookies = {}
-  if (request.headers.cookie) {
-    cookies = cookie.parse(request.headers.cookie);
-  }
-  if (cookies.email === 'ryujunhyun' && cookies.password === '123456') {
-    isOwner = true;
-  }
-  return isOwner;
-}
-
-function authStatusUI(request, response) {
-  var authStatusUI = '<div id ="login"><button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleModal">Login </button></div>';
-  if (authIsOwner(request, response)) {
-    authStatusUI = '<div id ="login"><button type="button" class="btn btn-light"><a href="/logout_process">Logout</a></button></button></div>';
-  }
-  return authStatusUI;
-}
-
 app.get('/', function (request, response) { // 홈페이지
   var title = 'introduce';
   var description = `<p>
@@ -89,7 +91,7 @@ app.get('/', function (request, response) { // 홈페이지
 
 app.get('/page/:pageId', function (request, response) { // 설명 페이지
   var i = 0;
-  var test, filelist;
+  var test, filelist, dir;
   while (i < p.length) {
     var j = 0;
     var cnt = 0;
@@ -118,6 +120,7 @@ app.get('/page/:pageId', function (request, response) { // 설명 페이지
         <button type="button" class="btn btn-outline-dark"><a href="/update/page/${filteredId}">수정</a></button>
         <form action="delete_process" method="post" onsubmit="return test()">
           <input type="hidden" name="id" value="${title}">
+          <input type="hidden" name="dir" value="${dir}">
           <button type="submit" class="btn btn-outline-dark">삭제</a></button>
         </form>
         </div>
@@ -166,9 +169,9 @@ app.post('/create_process/page/:pageId', function (request, response) {
   var description = post.description;
   fs.writeFile(`data/${request.params.pageId}/${title}`, description, 'utf8', function (err) {
     response.redirect(`/page/${title}`);
-      // response.write(`<script>setTimeout(function(){
-      //   location.href='/page/${title}';
-      // }, 1000)</script>`);
+    // response.write(`<script>setTimeout(function(){
+    //   location.href='/page/${title}';
+    // }, 1000)</script>`);
   });
 });
 
@@ -178,7 +181,7 @@ app.get('/update/page/:pageId', function(request, response){
     return false;
   }
   var i = 0;
-  var test, filelist;
+  var test, filelist, dir;
   while (i < p.length) {
     var j = 0;
     var cnt = 0;
@@ -187,6 +190,7 @@ app.get('/update/page/:pageId', function(request, response){
     while (j < filelist.length) {
       if (filelist[j] === request.params.pageId) {
         cnt++;
+        dir = `${p[i].name}`;
         break;
       }
       j = j + 1;
@@ -204,6 +208,7 @@ app.get('/update/page/:pageId', function(request, response){
       `
         <form action="/update_process" method="post">
           <input type="hidden" name="id" value="${title}">
+          <input type="hidden" name="dir" value="${dir}">
           <p>
             <div class="form-floating">
             <textarea class="form-control" textarea name="title" value="${title}" placeholder="Leave a comment here" id="floatingTextarea">${title}</textarea>
@@ -229,19 +234,18 @@ app.post('/update_process', function(request, response){
   var post = request.body;
   var id = post.id;
   var title = post.title;
+  var dir = post.dir;
   var description = post.description;
+  console.log(request.params.pageId);
   fs.rename(`data/${dir}/${id}`, `data/${dir}/${title}`, function(error){
     fs.writeFile(`data/${dir}/${title}`, description, 'utf8', function(err){
       response.redirect(`/page/${title}`);
-      // response.write(`<script>setTimeout(function(){
-      //   location.href='/page/${title}';
-      // }, 1000)</script>`);
     })
   });
 });
 
 app.post('/page/delete_process', function(request, response){
-  if(authIsOwner(request, response) === false){ // 로그인 안했을시 접근 불가
+  if(!authIsOwner(request, response)){ // 로그인 안했을시 접근 불가
     response.write("<script>alert('Login required!');location.href='/';</script>");
     return false;
   }
@@ -249,38 +253,10 @@ app.post('/page/delete_process', function(request, response){
   var post = request.body;
   var id = post.id;
   var filteredId = path.parse(id).base;
+  var dir = post.dir;
   fs.unlink(`data/${dir}/${filteredId}`, function(error){
     response.write("<script>alert('delete complete');location.href='/';</script>")
   });
-});
-
-app.post('/login_process', function (request, response) {
-  var post = request.body;
-
-  if (post.email === 'ryujunhyun' && post.password === '123456') {
-    response.writeHead(302, {
-      'Set-Cookie': [
-        `email=${post.email}`,
-        `password=${post.password}`
-      ],
-      Location: `/`
-    });
-    response.end();
-  }
-  else {
-    response.write("<script>alert('Login Fail');location.href='/';</script>");
-  }
-});
-
-app.get('/logout_process', function (request, response) {
-  response.writeHead(302, {
-      'Set-Cookie': [
-        `email=; Max-Age=0`,
-        `password=; Max-Age=0`
-      ],
-      Location: `/`
-    });
-    response.end();
 });
 
 app.listen(3000, function () {
