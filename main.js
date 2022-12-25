@@ -14,7 +14,7 @@ app.use('/create/page', express.static('public'));
 app.use('/update/page', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
-  secret: 'sdghodsg@#GSDnogs#%#$',	// 원하는 문자 입력
+  secret: 'sdghodsg@#GSDnogs#%#$',
   resave: false,
   saveUninitialized: true,
   store:new FileStore()
@@ -130,7 +130,7 @@ app.get('/page/:pageId', function (request, response) { // 설명 페이지
   });
 });
 
-app.get('/create/page/:pageId', function (request, response) {
+app.get('/create/page/:pageId', function (request, response) { // 글 생성 페이지
   if(authIsOwner(request, response) === false){ // 로그인 안했을시 접근 불가
     response.write("<script>alert('Login required!');location.href='/';</script>");
     return false;
@@ -163,19 +163,16 @@ app.get('/create/page/:pageId', function (request, response) {
   response.send(html);
 });
 
-app.post('/create_process/page/:pageId', function (request, response) {
+app.post('/create_process/page/:pageId', function (request, response) { // 글 생성 기능
   var post = request.body;
   var title = post.title;
   var description = post.description;
   fs.writeFile(`data/${request.params.pageId}/${title}`, description, 'utf8', function (err) {
     response.redirect(`/page/${title}`);
-    // response.write(`<script>setTimeout(function(){
-    //   location.href='/page/${title}';
-    // }, 1000)</script>`);
   });
 });
 
-app.get('/update/page/:pageId', function(request, response){
+app.get('/update/page/:pageId', function(request, response){ // 글 업데이트 페이지
   if(authIsOwner(request, response) === false){ // 로그인 안했을시 접근 불가
     response.write("<script>alert('Login required!');location.href='/';</script>");
     return false;
@@ -230,7 +227,7 @@ app.get('/update/page/:pageId', function(request, response){
   });
 });
 
-app.post('/update_process', function(request, response){
+app.post('/update_process', function(request, response){ // 업데이트 기능
   var post = request.body;
   var id = post.id;
   var title = post.title;
@@ -244,7 +241,7 @@ app.post('/update_process', function(request, response){
   });
 });
 
-app.post('/page/delete_process', function(request, response){
+app.post('/page/delete_process', function(request, response){ // 삭제 기능
   if(!authIsOwner(request, response)){ // 로그인 안했을시 접근 불가
     response.write("<script>alert('Login required!');location.href='/';</script>");
     return false;
